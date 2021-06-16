@@ -38,7 +38,7 @@
 
 #include "AC101.h"
 
-#define BCLK        // clock over BCLK comment out: clock over MCLK
+//#define BCLK        // clock over BCLK comment out: clock over MCLK
 
 #define AC101_ADDR			0x1A				// Device address
 
