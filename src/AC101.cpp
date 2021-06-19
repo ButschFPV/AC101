@@ -20,7 +20,8 @@
 
 	Febr  2021 modified by schreibfaul1  - set correct pll values
 	March 2021 modified by schreibfaul1  - can handle two i2c instances
-    May   2021 modified by schreibfaul1  - constructor changed
+	May   2021 modified by schreibfaul1  - constructor changed
+	June  2021 modified by ButschFPV     - added I2S clock source to AC101::begin
 
 	examples:
 
@@ -31,14 +32,16 @@
 	//two I2C busses:
 	TwoWire i2cBusOne = TwoWire(0);
 	TwoWire i2cBusTwo = TwoWire(1);
-    AC101 ac(&i2cBusOne);
+	AC101 ac(&i2cBusOne);
 
-    i2cBusOne.begin(sda, scl, 400000);
+	i2cBusOne.begin(sda, scl, 400000);
+    
+    	//AC101 clock source BCLK|MCLK:
+	ac.begin(sda, scl, 400000, 0);	// I2S clock from BCLK (default)
+	ac.begin(sda, scl, 400000, 1);	// I2S clock from MCLK
 */
 
 #include "AC101.h"
-
-//#define BCLK        // clock over BCLK comment out: clock over MCLK
 
 #define AC101_ADDR			0x1A				// Device address
 
@@ -181,7 +184,7 @@ AC101::AC101( TwoWire *TwoWireInstance ){
     _TwoWireInstance = TwoWireInstance;
 }
 //----------------------------------------------------------------------------------------------------------------------
-bool AC101::begin(int sda, int scl, uint32_t frequency) {
+bool AC101::begin(int sda, int scl, uint32_t frequency, uint8_t i2sClkSrc) {
     bool ok;
     if((sda >= 0) && (scl >= 0)){
 	    ok = Wire.begin(sda, scl, frequency);
@@ -205,13 +208,21 @@ bool AC101::begin(int sda, int scl, uint32_t frequency) {
 
 	// Clocking system
 	uint16_t PLLCLK_ENA = 1<<15;            /* 0: Disable, 1: Enable */
-#ifdef BCLK
-	uint16_t PLL_CLK = 0x2 << 12;           /* bclk1 */
-	uint16_t I2S1CLK_SRC = 0x3<<8;          /* PLL */
-#else
-	uint16_t PLL_CLK = 0x0 << 12;           /* MCLK1 */
-	uint16_t I2S1CLK_SRC = 0x0<<8;          /* MLCK1 */
-#endif
+	
+	uint16_t PLL_CLK;
+	uint16_t I2S1CLK_SRC;
+	
+	switch (i2sClkSrc) {
+		case 0:
+			PLL_CLK = 0x2 << 12;           /* bclk1 */
+			I2S1CLK_SRC = 0x3<<8;          /* PLL */
+			break;
+		case 1:
+			PLL_CLK = 0x0 << 12;           /* MCLK1 */
+			I2S1CLK_SRC = 0x0<<8;          /* MLCK1 */
+			break;
+	}
+	
 	uint16_t I2S1CLK_ENA = 1<<11;           /* 0: Disable, 1: Enable */
 
 	uint16_t SYSCLK_ENA = 1<<3;
