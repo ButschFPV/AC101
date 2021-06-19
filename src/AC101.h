@@ -102,7 +102,7 @@ public:
 	// @param sda		I2C SDA PIN
 	// @param scl		I2C SCL PIN
 	// @param frequency	I2C clock frequency
-	// @param clkSrc	I2S clock source, 0 = BCLK, 1 = MCLK
+	// @param clkSrc	I2S clock source ( 0 = BCLK, 1 = MCLK )
 	// @return True on success, false on failure.
 	bool begin(int sda = -1, int scl = -1, uint32_t frequency = 400000, uint8_t i2sClkSrc = 0);
 
